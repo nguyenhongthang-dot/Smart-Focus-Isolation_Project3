@@ -4,6 +4,8 @@
   var S = window.SFIT;
   var h = S.h;
 
+  var GOOGLE_SCRIPT_URL =
+    "https://script.google.com/macros/s/AKfycbwXdC2NmzL2O-M9F7OlE_DZc4fdVXsciJRqd_JFUHBdOgvf5tngdRm51zuil9ueSUkz/exec";
   /* ---------- Introduce ---------- */
   function buildIntro() {
     var tabh = h("div", { class: "tabh", text: "Introduce" });
@@ -41,23 +43,45 @@
       "</svg>";
 
     sent.addEventListener("click", function () {
+
+      var content = fbInput.value.trim();
       // --- PHẦN THÊM MỚI: Chặn gửi nếu ô input trống hoặc chỉ chứa khoảng trắng ---
-      if (!fbInput.value.trim()) {
+      if (!content) {
         fbInput.focus(); // Tự động đưa con trỏ chuột vào ô nhập để nhắc người dùng
         return;
       }
-      // --------------------------------------------------------------------------
+      // ------------------------------------------------------------------
 
-      if (sent.classList.contains("done")) return;
+      // 1. Đổi chữ nút thành "Sending..." (Tùy chọn) để báo hiệu đang gửi
+      sent.querySelector(".lbl").textContent = "Sending...";
 
-      sent.classList.add("done");
-
-      fbInput.value = "";
-      S.state.fbDraft = "";
-
-      setTimeout(function () {
-        sent.classList.remove("done");
-      }, 2000);
+      // 2. Dùng Fetch API để gọi ngầm lên Google Script
+      fetch(GOOGLE_SCRIPT_URL, {
+          method: 'POST',
+          mode: 'no-cors', // Rất quan trọng để không bị lỗi bảo mật CORS của trình duyệt
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: 'feedback=' + encodeURIComponent(content) // Đẩy nội dung vào biến feedback
+      })
+      .then(function() {
+          // 3. Khi gửi thành công
+          sent.classList.add("done");
+          
+          fbInput.value = "";
+          S.state.fbDraft = "";
+          
+          // Trả lại trạng thái sau 2s
+          setTimeout(function () {
+            sent.classList.remove("done");
+            sent.querySelector(".lbl").textContent = "Sent"; // Trả lại chữ Sent
+          }, 2000);
+      })
+      .catch(function(error) {
+          console.error("Lỗi gửi feedback:", error);
+          alert("Lỗi mạng, không thể gửi feedback lúc này!");
+          sent.querySelector(".lbl").textContent = "Sent";
+      });
     });
 
     var panel = h("div", { class: "panel" }, [

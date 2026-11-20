@@ -288,6 +288,8 @@ h3 {
 body:has(.tabh) .btn {
   top: auto; /* Hủy ghim mép trên */
   bottom: 4vh; /* Ghim xuống mép dưới */
+  text-align: center;
+  min-width: 175px;
 }
 
 .kw {
@@ -494,4 +496,47 @@ body:has(.tabh) .btn {
   object-fit: contain;
   display: block;
   flex: none;
+}
+
+/* Trạng thái chưa lưu: Nút phình ra, màu vàng, chữ đen */
+.btn.unsaved {
+  background: var(--y) !important;
+  color: #111 !important;
+  border: 2px solid #fff !important;
+  transform: scale(1.15); /* Phình to ra 15% */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hiệu ứng rung lắc khi cố thoát mà chưa lưu */
+.btn.shake {
+  animation: shake-btn 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+@keyframes shake-btn {
+  10%,
+  90% {
+    transform: scale(1.15) translate3d(-2px, 0, 0);
+  }
+  20%,
+  80% {
+    transform: scale(1.15) translate3d(4px, 0, 0);
+  }
+  30%,
+  50%,
+  70% {
+    transform: scale(1.15) translate3d(-6px, 0, 0);
+  }
+  40%,
+  60% {
+    transform: scale(1.15) translate3d(6px, 0, 0);
+  }
+}
+
+/* Trạng thái chưa có thay đổi -> Khóa nút và hiện dấu cấm */
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed !important;
+  transform: none !important;
+  background: transparent !important;
+  color: #fff !important;
 }

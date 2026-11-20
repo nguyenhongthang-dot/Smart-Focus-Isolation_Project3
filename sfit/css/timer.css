@@ -224,7 +224,7 @@
 /* Nhún khi nhắn vào */
 .clock .hg:active:not(:disabled),
 .reset:active:not(:disabled),
-.btn:active,
+.btn:active:not(:disabled),
 .vol-left:active {
   animation: pop 0.25s ease;
 }
@@ -248,14 +248,17 @@
 /* 2. Khi hover: Đổi màu, phóng to nhẹ (scale) và thêm bóng đổ (box-shadow) để tạo cảm giác nổi lên */
 .clock .hg:hover:not(:disabled),
 .reset:hover:not(:disabled),
-.btn:hover,
 .vol-left:hover {
   background: #ffbd1f !important;
   transform: scale(1.08); /* Phóng to nút lên 108% (chỉnh thành 1.05 nếu muốn phóng nhỏ hơn) */
 }
 
-
-
+.btn:hover {
+  background: #ffbd1f !important;
+  transform: scale(1.08);
+  color: #111 !important; /* Đổi màu chữ sang đen khi hover */
+  font-weight: 600; /* Đổi chữ sang đậm khi hover */
+}
 
 /* ===== Hộp nhập giờ (Set time) ===== */
 .tm-modal {

@@ -27,6 +27,7 @@
     var bVi = h("button", {
       text: "Tiếng Việt",
       onclick: function () {
+        if (state.lang !== "vi") markUnsaved();
         state.lang = "vi";
         paintLang();
       },
@@ -34,6 +35,7 @@
     var bEn = h("button", {
       text: "English",
       onclick: function () {
+        if (state.lang !== "en") markUnsaved();
         state.lang = "en";
         paintLang();
       },
@@ -56,6 +58,7 @@
       var b = h("button", {
         text: t[1],
         onclick: function () {
+          if (state.theme !== t[0]) markUnsaved();
           state.theme = t[0];
           paintTheme();
         },
@@ -73,8 +76,17 @@
     var save = h("button", {
       class: "btn",
       text: "Save AI configuration",
+      disabled: true,
     });
     var saveTimer = null;
+
+    function markUnsaved() {
+      S.hasUnsavedSettings = true;
+      save.disabled = false;
+      save.classList.add("unsaved");
+      save.textContent = "Save AI configuration";
+    }
+
     save.addEventListener("click", function () {
       try {
         localStorage.setItem(
@@ -85,9 +97,12 @@
             lang: state.lang,
           }),
         );
-        save.textContent = "✓ Saved";
+        save.textContent = "Saved";
+        S.hasUnsavedSettings = false;
+        save.disabled = true;
+        save.classList.remove("unsaved", "shake");
       } catch (e) {
-        save.textContent = "⚠ Cannot save";
+        save.textContent = "Cannot save";
       }
       clearTimeout(saveTimer);
       saveTimer = setTimeout(function () {
@@ -135,6 +150,7 @@
       }
       sw.addEventListener("click", function () {
         state.sources[k] = !state.sources[k];
+        markUnsaved();
         paint();
       });
       paint();
@@ -164,6 +180,7 @@
           state.kws = state.kws.filter(function (v) {
             return v !== k;
           });
+          markUnsaved();
           paintChips();
         });
         kw.insertBefore(h("span", { class: "chip" }, [k + " ", x]), input);
@@ -172,7 +189,10 @@
     input.addEventListener("keydown", function (e) {
       var v = input.value.trim();
       if (e.key === "Enter" && v) {
-        if (state.kws.indexOf(v) === -1) state.kws.push(v);
+        if (state.kws.indexOf(v) === -1) {
+          state.kws.push(v);
+          markUnsaved();
+        }
         input.value = "";
         paintChips();
       }
