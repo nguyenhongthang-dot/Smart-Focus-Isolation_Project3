@@ -23,12 +23,11 @@ def get_overview_stats() -> dict:
         "growth_rate": 0.0,
         "saved_minutes": 0,
         "focus_points": 0,
-        "focus_points_today": 0  # <--- BỔ SUNG DÒNG NÀY
+        "focus_points_today": 0
     }
     
     if not conn:
         return default_stats
-
 
     try:
         query_all = "SELECT is_urgent, COUNT(*) as count FROM message_logs GROUP BY is_urgent"
@@ -49,63 +48,9 @@ def get_overview_stats() -> dict:
         """
         df_yesterday = pd.read_sql_query(query_yesterday, conn)
 
-
-        # --- CẢI TIẾN TÍNH THỜI GIAN CHUẨN XÁC BẰNG PYTHON ---
-        cursor = conn.cursor()
-        
-        # 1. Tổng số giây từ các phiên ĐÃ TẮT (STOPPED)
-        cursor.execute("SELECT SUM(COALESCE(duration_seconds, 0)) FROM focus_sessions WHERE status = 'STOPPED'")
-        row_stopped = cursor.fetchone()
-        stopped_seconds = row_stopped[0] if row_stopped and row_stopped[0] else 0
-
-
-        # 2. Tổng số giây từ phiên ĐANG BẬT (ACTIVE) - CHỈ LẤY ĐÚNG 1 PHIÊN MỚI NHẤT
-        cursor.execute("SELECT start_time FROM focus_sessions WHERE status = 'ACTIVE' ORDER BY id DESC LIMIT 1")
-        active_row = cursor.fetchone()
-        
-        active_seconds = 0
-        now = datetime.now()
-        
-        if active_row and active_row[0]:
-            try:
-                # Parse chuỗi start_time từ DB ra datetime object
-                start_dt = datetime.strptime(active_row[0], "%Y-%m-%d %H:%M:%S")
-                diff = (now - start_dt).total_seconds()
-                if diff > 0:
-                    active_seconds = diff
-            except Exception as e:
-                print(f"[LỖI PARSE START_TIME]: {e}")
-
-
-        # Tổng số giây thực tế chuẩn 100%
-        total_seconds = stopped_seconds + active_seconds
-        total_minutes = int(total_seconds // 60)
-        
-        # Max limit là 2000 phút
-        focus_points = min(total_minutes, 2000)
-
-        # --- BỔ SUNG CODE TÍNH ĐIỂM CHỈ TRONG HÔM NAY ---
-        cursor.execute("SELECT SUM(COALESCE(duration_seconds, 0)) FROM focus_sessions WHERE status = 'STOPPED' AND date(start_time) = date('now', 'localtime')")
-        row_stopped_today = cursor.fetchone()
-        stopped_today = row_stopped_today[0] if row_stopped_today and row_stopped_today[0] else 0
-
-        cursor.execute("SELECT start_time FROM focus_sessions WHERE status = 'ACTIVE' AND date(start_time) = date('now', 'localtime') ORDER BY id DESC LIMIT 1")
-        active_row_today = cursor.fetchone()
-        active_today = 0
-        if active_row_today and active_row_today[0]:
-            try:
-                start_dt_today = datetime.strptime(active_row_today[0], "%Y-%m-%d %H:%M:%S")
-                diff_today = (datetime.now() - start_dt_today).total_seconds()
-                if diff_today > 0:
-                    active_today = diff_today
-            except: pass
-
-        focus_points_today = int((stopped_today + active_today) // 60)
-        # ------------------------------------------------
-
+        # --- ĐÃ XÓA TOÀN BỘ CODE TÍNH THỜI GIAN/ĐIỂM TẬP TRUNG TẠI ĐÂY ---
 
         stats = default_stats.copy()
-
 
         for _, row in df_all.iterrows():
             if row['is_urgent'] == 1:
@@ -114,14 +59,12 @@ def get_overview_stats() -> dict:
                 stats['all_time']['blocked'] = int(row['count'])
         stats['all_time']['total'] = stats['all_time']['blocked'] + stats['all_time']['urgent']
 
-
         for _, row in df_today.iterrows():
             if row['is_urgent'] == 1:
                 stats['today']['urgent'] = int(row['count'])
             else:
                 stats['today']['blocked'] = int(row['count'])
         stats['today']['total'] = stats['today']['blocked'] + stats['today']['urgent']
-
 
         yesterday_count = int(df_yesterday['count'].iloc[0]) if not df_yesterday.empty else 0
         stats['yesterday_total'] = yesterday_count
@@ -130,11 +73,9 @@ def get_overview_stats() -> dict:
         else:
             stats['growth_rate'] = 0.0
 
-
         stats['saved_minutes'] = int(stats['today']['blocked'] * 1.5)
-        stats['focus_points'] = focus_points
-        stats['focus_points_today'] = focus_points_today # <--- BỔ SUNG DÒNG NÀY
-
+        stats['focus_points'] = 0       # Gán cứng bằng 0
+        stats['focus_points_today'] = 0 # Gán cứng bằng 0
 
         return stats
     except Exception as e:
@@ -157,10 +98,8 @@ def get_hourly_distribution() -> list:
             "urgent_count": 0
         })
 
-
     if not conn:
         return hourly_template
-
 
     try:
         query = """
@@ -181,7 +120,6 @@ def get_hourly_distribution() -> list:
                 "blocked_count": int(row['blocked_count']),
                 "urgent_count": int(row['urgent_count'])
             }
-
 
         result = []
         for item in hourly_template:
@@ -205,7 +143,6 @@ def get_hourly_distribution() -> list:
         return hourly_template
     finally:
         conn.close()
-
 
 def get_recent_urgent_logs(limit: int = 10) -> list:
     conn = get_connection()

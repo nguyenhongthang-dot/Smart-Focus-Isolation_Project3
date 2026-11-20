@@ -1,4 +1,6 @@
 # api_server.py
+# gui len github dung
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import json
@@ -127,4 +129,4 @@ async def stop_collector():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000, log_level="warning")
+    uvicorn.run(app, host="127.0.0.1", port=8000, log_level="info") # Đổi warning thành info

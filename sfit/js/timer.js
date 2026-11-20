@@ -13,7 +13,16 @@
   T.started = false; // MỚI: đã bấm Start và chưa Reset (kể cả đang Pause)
   var tick = null;
   var finishTimer = null; // MỚI: chờ 1,5s sau khi hết giờ rồi mới reset về mặc định
-
+  // THÊM HÀM NÀY ĐỂ GỌI BACKEND
+  async function triggerBackend(action) {
+    try {
+      await fetch("http://127.0.0.1:8000/api/collector/" + action, {
+        method: "POST",
+      });
+    } catch (e) {
+      console.log("Lỗi kết nối Backend:", e);
+    }
+  }
   var CLOSE_ICON =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M8.5 8.5l7 7M15.5 8.5l-7 7"/></svg>';
 
@@ -47,8 +56,15 @@
 
   function startTick() {
     if (tick) return;
+
+    // THÊM DÒNG NÀY: Lưu mốc thời gian lúc bắt đầu chạy dựa trên thời gian hệ thống,
+    // trừ đi thời gian đã trôi qua (T.el) để xử lý đúng khi Pause/Continue
+    var startTime = Date.now() - T.el * 1000;
+
     tick = setInterval(function () {
-      T.el += 1;
+      // SỬA DÒNG NÀY: Tính số giây thực tế trôi qua thay vì dùng T.el += 1
+      T.el = Math.floor((Date.now() - startTime) / 1000);
+
       if (T.mode === "timer" && T.el >= total()) {
         /* MỚI: hết giờ -> vòng tròn đủ 1 vòng, giữ 1,5s rồi reset về mặc định */
         T.run = false;
@@ -75,9 +91,13 @@
 
   function setRun(v) {
     if (v) finishNow(); // MỚI: bấm Start lúc đang chờ reset thì reset luôn rồi chạy
+    // THÊM ĐOẠN NÀY: Nếu là lần đầu tiên bật (chưa started) thì gọi API bật quét tin nhắn
+    if (v && !T.started) {
+      triggerBackend("start");
+    }
     if (v) {
       closeTimeModal();
-      T.started = true; // MỚI: Start / Continue -> đã bắt đầu
+      T.started = true;
     }
     T.run = v;
     if (v) startTick();
@@ -86,6 +106,9 @@
   }
 
   function reset() {
+    if (T.started) {
+      triggerBackend("stop");
+    }
     finishNow(); // MỚI
     T.el = 0;
     T.started = false; // MỚI: Reset -> về Start focus, Reset mờ lại
