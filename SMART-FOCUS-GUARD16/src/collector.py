@@ -12,7 +12,7 @@ if BASE_DIR not in sys.path:
     sys.path.append(BASE_DIR)
 
 # Bây giờ mới gọi các file của dự án ra thì Python mới tìm thấy được
-from dnd_manager import open_dnd_settings
+from dnd_manager import prompt_enable_dnd, prompt_disable_dnd
 from analyzer import process_and_notify_async, encrypt_sender_name
 
 from winsdk.windows.ui.notifications import (
@@ -260,7 +260,7 @@ async def start_listener():
     print("🛡️  SMART FOCUS GUARD - UNIFIED COLLECTOR IS RUNNING    🛡️")
     print("=========================================================")
 
-    open_dnd_settings()
+    prompt_enable_dnd() # Chỉ hiện cửa sổ Settings nếu DND đang TẮT
     # 1. KÍCH HOẠT ZALO BẰNG ĐA TIẾN TRÌNH (SUBPROCESS - CÁCH LY 100%)
     # 1. KÍCH HOẠT ZALO BẰNG ĐA TIẾN TRÌNH (AN TOÀN CHO ĐÓNG GÓI .EXE)
     import multiprocessing
@@ -312,13 +312,19 @@ async def start_listener():
     backup_task = asyncio.create_task(poll_action_center_backup(listener))
 
     def on_notification_changed(sender, event_args: UserNotificationChangedEventArgs):
+        def safe_fetch(notif_id):
+            try:
+                user_notif = listener.get_notification(notif_id)
+                if user_notif:
+                    process_user_notification(user_notif)
+            except Exception:
+                pass
+
         try:
-            notification_id = event_args.user_notification_id
-            user_notification = listener.get_notification(notification_id)
-            if user_notification:
-                process_user_notification(user_notification)
+            if MAIN_LOOP and MAIN_LOOP.is_running():
+                MAIN_LOOP.call_soon_threadsafe(safe_fetch, event_args.user_notification_id)
         except Exception as err:
-            print(f"[DEBUG] Lỗi trích xuất thông báo: {err}")
+            print(f"[DEBUG] Lỗi điều phối luồng thông báo: {err}")
 
     token = listener.add_notification_changed(on_notification_changed)
 
@@ -328,34 +334,35 @@ async def start_listener():
     except asyncio.CancelledError:
         print("\n🛑 [STOP] Đang dọn dẹp và tắt hệ thống Collector...")
 
-        # 1. Gỡ listener sự kiện
-        try:
-            listener.remove_notification_changed(token)
-        except Exception:
-            pass
-
-        # 2. Hủy các Task ngầm con
+        # 1. Hủy ngay lập tức các Task asyncio
         worker_task.cancel()
         backup_task.cancel()
-        if ZALO_PROCESS and ZALO_PROCESS.poll() is None:  # <--- Đổi .is_alive() thành .poll() is None
+
+        # 2. Tắt Zalo Process dứt điểm
+        if ZALO_PROCESS and ZALO_PROCESS.poll() is None:
             try:
                 ZALO_PROCESS.terminate()
                 ZALO_PROCESS.kill()
             except Exception:
                 pass
             
-# --- THÊM VÀO ĐÂY: BẬT LẠI TIẾNG CHO CHẮC CÚ ---
+        # 3. Bật lại tiếng Zalo
         try:
             from pycaw.pycaw import AudioUtilities
             sessions = AudioUtilities.GetAllSessions()
             for session in sessions:
                 if session.Process and session.Process.name().lower() == "zalo.exe":
-                    session.SimpleAudioVolume.SetMute(0, None) # 0 là unmute
+                    session.SimpleAudioVolume.SetMute(0, None)
             print("Đã an toàn bật lại tiếng Zalo từ file chính!")
         except Exception:
             pass
 
-        open_dnd_settings()
+        # 4. Kiểm tra và Tắt DND
+        try:
+            prompt_disable_dnd() 
+        except Exception:
+            pass
+
         raise  # Báo lại CancelledError cho api_server nhận biết
 
 
@@ -366,4 +373,3 @@ if __name__ == "__main__":
         asyncio.run(start_listener())
     except KeyboardInterrupt:
         pass
-

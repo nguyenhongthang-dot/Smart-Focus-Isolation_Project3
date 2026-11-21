@@ -5,18 +5,17 @@
   var h = S.h,
     state = S.state;
 
-  /* ---------- Settings ---------- */
   var SUB = {
     Zalo: "Messaging application",
     "Messenger/facebook": "Social network",
-    GMAIL: "Email box",
+    Gmail: "Email box",
     Discord: "Chat community",
   };
 
   var SRC_ICON = {
     Zalo: "assets/zalo.png",
     "Messenger/facebook": "assets/messenger.png",
-    GMAIL: "assets/gmail.png",
+    Gmail: "assets/gmail.png",
     Discord: "assets/discord.png",
   };
 

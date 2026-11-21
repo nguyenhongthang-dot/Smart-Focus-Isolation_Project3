@@ -16,7 +16,7 @@
   // THÊM HÀM NÀY ĐỂ GỌI BACKEND
   async function triggerBackend(action) {
     try {
-      await fetch("http://127.0.0.1:8000/api/collector/" + action, {
+      await fetch("http://127.0.0.1:8001/api/collector/" + action, {
         method: "POST",
       });
     } catch (e) {
