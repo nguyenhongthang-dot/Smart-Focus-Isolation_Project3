@@ -97,7 +97,7 @@ async def start_collector():
         trigger_alert(
             source="Smart focus isolation",
             sender="SFIT",
-            content="Hệ thống đã bắt đầu hoạt động, chúc bạn một phiên tập trung hiệu quả 🩵",
+            content="Hệ thống đã bắt đầu hoạt động, chúc bạn một phiên tập trung hiệu quả",
             is_urgent=1,
             reason="Khởi động phiên"
         )
