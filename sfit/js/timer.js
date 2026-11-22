@@ -68,6 +68,12 @@
       if (T.mode === "timer" && T.el >= total()) {
         /* MỚI: hết giờ -> vòng tròn đủ 1 vòng, giữ 1,5s rồi reset về mặc định */
         T.run = false;
+
+        // Gọi cho Backend biết là phiên tập trung đã kết thúc (Timer về 0)
+        if (T.started) {
+          triggerBackend("stop");
+        }
+
         T.started = false; // MỚI: hết giờ -> về trạng thái ban đầu
         T.el = total();
         finishTimer = setTimeout(function () {

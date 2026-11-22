@@ -357,11 +357,11 @@ async def start_listener():
         except Exception:
             pass
 
-        # 4. Kiểm tra và Tắt DND
-        try:
-            prompt_disable_dnd() 
-        except Exception:
-            pass
+        # # 4. Kiểm tra và Tắt DND
+        # try:
+        #     prompt_disable_dnd() 
+        # except Exception:
+        #     pass
 
         raise  # Báo lại CancelledError cho api_server nhận biết
 

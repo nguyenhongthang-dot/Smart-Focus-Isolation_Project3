@@ -1,5 +1,6 @@
 # api_server.py
 # gui len github dung
+# da gui 
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -119,13 +120,40 @@ async def stop_collector():
         
         # Kết thúc phiên tập trung và lưu thời gian trong DB
         if current_session_id is not None:
+            from database import stop_live_session
             stop_live_session(current_session_id)
             current_session_id = None
             
-        return {"status": "stopped", "message": "Đã tắt hoàn toàn Collector."}
+        # ==============================================================
+        # SỬ DỤNG HÀM KIỂM TRA DND CÓ SẴN TRONG DND_MANAGER
+        # ==============================================================
+        from dnd_manager import is_dnd_enabled
+        dnd_state = is_dnd_enabled()
+        
+        # Nếu DND đang BẬT (True) -> Kêu gọi click vào popup để TẮT DND
+        if dnd_state is True:
+            msg_content = "CHÚC MỪNG BẠN ĐÃ HOÀN THÀNH PHIÊN TẬP TRUNG (NHẤN VÀO ĐÂY ĐỂ TẮT DO NOT DISTURB)"
+            dnd_link = "ms-settings:notifications"
+        else:
+            # Nếu DND đã TẮT (False hoặc None) -> Chỉ chúc mừng
+            msg_content = "CHÚC MỪNG BẠN ĐÃ HOÀN THÀNH PHIÊN TẬP TRUNG"
+            dnd_link = ""
+
+        # Phát âm thanh và hiện Popup đỏ/vàng
+        from notifier import trigger_alert
+        trigger_alert(
+            source="Smart focus isolation",
+            sender="SFIT",
+            content=msg_content,
+            is_urgent=1,          
+            reason="Kết thúc phiên",
+            deep_link=dnd_link    
+        )
+        # ==============================================================
+
+        return {"status": "stopped", "message": "Đã tắt hoàn toàn Collector và hiện Popup."}
     
     return {"status": "already_stopped", "message": "Collector đã dừng từ trước."}
-
 
 if __name__ == "__main__":
     import uvicorn
