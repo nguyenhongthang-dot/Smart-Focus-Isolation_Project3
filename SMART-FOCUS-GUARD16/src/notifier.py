@@ -329,6 +329,25 @@ def _popup_manager_process():
                 self.bounce_anim.start()
 
         def open_and_search_application(self):
+
+            # --- THÊM ĐOẠN NÀY ĐỂ CHẶN TÌM KIẾM VỚI POPUP HỆ THỐNG ---
+            if self.source_app == "Smart focus isolation":
+                return
+            # ---------------------------------------------------------
+
+            import os
+            import webbrowser
+            try:
+                import win32gui
+                import win32con
+                import win32com.client 
+            except ImportError:
+                print("Lỗi: Thiếu thư viện pywin32.")
+                return
+
+            source = self.source_app.lower()
+            # ... (phần code còn lại bên dưới giữ nguyên) ...
+            
             import os
             import webbrowser
             try:

@@ -20,9 +20,9 @@
   try {
     var saved = JSON.parse(localStorage.getItem("sfit-settings") || "null");
     if (saved) {
-      if (saved.sources) state.sources = saved.sources;
-      if (Array.isArray(saved.kws)) state.kws = saved.kws;
+      // Chỉ giữ lại việc tải ngôn ngữ và chủ đề từ localStorage
       if (saved.lang) state.lang = saved.lang;
+      if (saved.theme) state.theme = saved.theme;
     }
   } catch (e) {
     /* localStorage may be unavailable */

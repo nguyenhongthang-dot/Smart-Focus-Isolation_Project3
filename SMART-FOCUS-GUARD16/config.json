@@ -1,21 +1,18 @@
 {
   "sources": {
     "Zalo": true,
-    "Messenger": true,
-    "Facebook": true,
     "Google Chrome": true,
     "Gmail": true,
-    "Discord": true
+    "Discord": true,
+    "Messenger/facebook": true
   },
   "keywords": [
-    "deadline",
     "nộp bài",
     "gấp",
     "hoãn",
-    "cấp cứu",
     "quan trọng",
     "@All",
-    "kiểm tra",
-    "@Mọi người"
+    "@Mọi người",
+    "kiểm tra"
   ]
 }

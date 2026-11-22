@@ -86,21 +86,44 @@
       save.textContent = "Save AI configuration";
     }
 
-    save.addEventListener("click", function () {
+    save.addEventListener("click", async function () {
       try {
+        // 1. Lưu cấu hình giao diện (ngôn ngữ, chủ đề) vào localStorage cho Front-end xử lý
         localStorage.setItem(
           "sfit-settings",
           JSON.stringify({
             sources: state.sources,
             kws: state.kws,
             lang: state.lang,
+            theme: state.theme,
           }),
         );
-        save.textContent = "Saved";
-        S.hasUnsavedSettings = false;
-        save.disabled = true;
-        save.classList.remove("unsaved", "shake");
+
+        // 2. Gửi Data Sources và Keywords xuống Backend để lưu vào config.json
+        // Chú ý: Backend (analyzer.py) dùng key là 'keywords' thay vì 'kws'
+        const payload = {
+          sources: state.sources,
+          keywords: state.kws,
+        };
+
+        const response = await fetch("http://127.0.0.1:8001/api/config", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (response.ok) {
+          save.textContent = "Saved";
+          S.hasUnsavedSettings = false;
+          save.disabled = true;
+          save.classList.remove("unsaved", "shake");
+        } else {
+          save.textContent = "API Error";
+        }
       } catch (e) {
+        console.error(e);
         save.textContent = "Cannot save";
       }
       clearTimeout(saveTimer);
@@ -127,7 +150,7 @@
 
     /* sources grid */
     var grid = h("div", { class: "grid" });
-    Object.keys(state.sources).forEach(function (k) {
+    Object.keys(SRC_ICON).forEach(function (k) {
       var sw = h("button", {
         class: "sw",
         role: "switch",

@@ -132,11 +132,11 @@ async def stop_collector():
         
         # Nếu DND đang BẬT (True) -> Kêu gọi click vào popup để TẮT DND
         if dnd_state is True:
-            msg_content = "CHÚC MỪNG BẠN ĐÃ HOÀN THÀNH PHIÊN TẬP TRUNG (NHẤN VÀO ĐÂY ĐỂ TẮT DO NOT DISTURB)"
+            msg_content = "Chúc mừng bạn đã hoàn thành phiên tập trung ! Hãy nhấn vào popup để tắt chế độ DND."
             dnd_link = "ms-settings:notifications"
         else:
             # Nếu DND đã TẮT (False hoặc None) -> Chỉ chúc mừng
-            msg_content = "CHÚC MỪNG BẠN ĐÃ HOÀN THÀNH PHIÊN TẬP TRUNG"
+            msg_content = "Chúc mừng bạn đã hoàn thành phiên tập trung !."
             dnd_link = ""
 
         # Phát âm thanh và hiện Popup đỏ/vàng

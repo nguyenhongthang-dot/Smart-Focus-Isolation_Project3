@@ -197,8 +197,13 @@ async def process_and_notify_async(
     """Hàm xử lý trọn gói: Đã thêm kiểm tra tắt/bật nguồn thông báo (Source)"""
     config = load_config()
 
+    # Xác định tên công tắc cần kiểm tra trong config
+    config_key = source
+    if source in ["Messenger", "Facebook", "facebook"]:
+      config_key = "Messenger/facebook"  # Khớp với key từ giao diện web
+
     # TÍNH NĂNG 1: Kiểm tra xem Nguồn (App/Source) có đang bật không
-    is_source_enabled = config.get("sources", {}).get(source, True)
+    is_source_enabled = config.get("sources", {}).get(config_key, True)
 
     if not is_source_enabled:
         print(f"🚫 [BỎ QUA] Tin nhắn từ {source} (Nguồn đã tắt trong Cài đặt).")
