@@ -147,7 +147,7 @@ def _popup_manager_process():
             self.setStyleSheet(f"""
                 #Outer {{
                     background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                                                stop:0.27 #FFCD2C,
+                                                stop:0.27 #FFBE19,
                                                 stop:1.0 #FFF08C);
                     border: 2px solid #FFFFFF;
                     border-radius: {S(52)}px;
