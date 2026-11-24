@@ -42,7 +42,7 @@
     panel.appendChild(listContainer);
 
     /* Fetch dữ liệu thực tế từ Backend API (cổng 8001) */
-    fetch("http://127.0.0.1:8001/api/recent-urgent")
+    fetch("http://127.0.0.1:8005/api/recent-urgent")
       .then(function (response) {
         return response.json();
       })

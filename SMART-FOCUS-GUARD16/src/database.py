@@ -1,5 +1,7 @@
 import os
 import sqlite3
+import threading
+import urllib.request
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -54,7 +56,16 @@ def init_db():
 init_db()  # <-- Thêm gọi hàm tự động
 
 
-
+def _notify_blocked():
+    """Báo cho api_server biết vừa có 1 tin bị chặn (thread riêng, lỗi thì bỏ qua)."""
+    try:
+        req = urllib.request.Request(
+            "http://127.0.0.1:8005/api/internal/blocked", data=b"", method="POST"
+        )
+        urllib.request.urlopen(req, timeout=1).read()
+    except Exception:
+        pass
+    
 
 def save_message(
     source: str, sender: str, content: str, is_urgent: int, reason: str = "", session_id: int = None
@@ -71,7 +82,11 @@ def save_message(
             (session_id, source, sender, content, is_urgent, reason),
         )
         conn.commit()
+        
     print(f"[DB Saved] [Session #{session_id}] {source} | Từ: {sender} | Gấp: {is_urgent}")
+
+    if is_urgent == 0:
+        threading.Thread(target=_notify_blocked, daemon=True).start()
 
 
 

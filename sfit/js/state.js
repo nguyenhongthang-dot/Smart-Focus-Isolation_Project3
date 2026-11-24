@@ -31,5 +31,35 @@
   S.PRESETS = PRESETS;
   S.state = state;
   S.view = document.getElementById("view");
+  /* Đếm số nguồn đang bật và hiện lên pill "Connected" */
+  S.updateConnected = function () {
+    var el = document.getElementById("connected-count");
+    if (!el) return;
+    var n = Object.keys(state.sources).filter(function (k) {
+      return state.sources[k];
+    }).length;
+    el.textContent = n + (n === 1 ? " resource" : " resources");
+  };
+
+  /* Pill "Blocked": giữ số đếm, chỉ hỏi backend 1 lần để lấy số gốc */
+  S.blockedCount = 0;
+
+  S.paintBlocked = function () {
+    var el = document.getElementById("blocked-count");
+    if (!el) return;
+    var n = S.blockedCount;
+    el.textContent = n + (n === 1 ? " message" : " messages");
+  };
+
+  S.syncBlocked = async function () {
+    try {
+      var res = await fetch("http://127.0.0.1:8005/api/stats");
+      if (!res.ok) return;
+      var data = await res.json();
+      S.blockedCount = data.today.blocked;
+      S.paintBlocked();
+    } catch (e) {}
+  };
+
   S.ui = {}; // tham chiếu tới phần tử timer đang hiển thị
 })();

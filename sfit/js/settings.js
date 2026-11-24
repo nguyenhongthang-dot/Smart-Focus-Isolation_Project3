@@ -106,7 +106,7 @@
           keywords: state.kws,
         };
 
-        const response = await fetch("http://127.0.0.1:8001/api/config", {
+        const response = await fetch("http://127.0.0.1:8005/api/config", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -119,6 +119,7 @@
           S.hasUnsavedSettings = false;
           save.disabled = true;
           save.classList.remove("unsaved", "shake");
+          S.updateConnected();
         } else {
           save.textContent = "API Error";
         }

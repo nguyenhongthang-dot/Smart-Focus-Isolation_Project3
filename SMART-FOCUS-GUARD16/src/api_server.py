@@ -4,6 +4,7 @@
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 import json
 from analytics import get_overview_stats, get_hourly_distribution, get_recent_urgent_logs
 from analyzer import load_config
@@ -20,6 +21,7 @@ from contextlib import asynccontextmanager
 # Biến toàn cục
 current_session_id = None
 collector_task = None
+subscribers = set()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -155,6 +157,35 @@ async def stop_collector():
     
     return {"status": "already_stopped", "message": "Collector đã dừng từ trước."}
 
+@app.post("/api/internal/blocked")
+async def notify_blocked():
+    for q in list(subscribers):
+        q.put_nowait("blocked")
+    return {"ok": True}
+
+
+@app.get("/api/events")
+async def events():
+    q = asyncio.Queue()
+    subscribers.add(q)
+
+    async def gen():
+        try:
+            while True:
+                try:
+                    msg = await asyncio.wait_for(q.get(), timeout=25)
+                    yield f"data: {msg}\n\n"
+                except asyncio.TimeoutError:
+                    yield ": ping\n\n"
+        finally:
+            subscribers.discard(q)
+
+    return StreamingResponse(
+        gen(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8001, log_level="info") # Đổi warning thành info
+    uvicorn.run(app, host="127.0.0.1", port=8005, log_level="info", timeout_graceful_shutdown=1) # Đổi warning thành info
