@@ -16,7 +16,7 @@
   // THÊM HÀM NÀY ĐỂ GỌI BACKEND
   async function triggerBackend(action) {
     try {
-      await fetch("http://127.0.0.1:8005/api/collector/" + action, {
+      await fetch("http://127.0.0.1:8009/api/collector/" + action, {
         method: "POST",
       });
     } catch (e) {
@@ -284,6 +284,7 @@
   }
 
   function switchMode(m) {
+    if (m === T.mode || T.started) return;
     finishNow(); // MỚI
     closeTimeModal();
     T.mode = m;

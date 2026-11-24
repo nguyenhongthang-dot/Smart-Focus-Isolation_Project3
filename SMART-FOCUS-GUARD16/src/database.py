@@ -1,182 +1,134 @@
+"""SQLite chỉ để lưu TIN KHẨN CẤP (popup) trong 2 ngày gần nhất.
+Tin cũ hơn 2 ngày tự bị xóa. Lịch sử 5 tin cho AI chỉ nằm trong RAM.
+Số tin bị chặn chỉ là MỘT CON SỐ lưu trong bảng counters (không lưu nội dung tin),
+nên tắt/bật app vẫn giữ nguyên và cộng dồn tiếp.
+Giữ nguyên tên save_message / get_recent_history nên analyzer.py, notifier.py không cần sửa.
+"""
 import os
 import sqlite3
 import threading
 import urllib.request
-
+from collections import deque
+from datetime import datetime
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB_PATH = os.path.join(BASE_DIR, "focus_guard.db")
+KEEP_DAYS = 2
 
-
+_lock = threading.Lock()
+_history = {}          # RAM: 5 tin gần nhất của mỗi người gửi, làm ngữ cảnh cho AI
 
 
 def get_connection():
-    return sqlite3.connect(DB_PATH)
+    """Mở DB và TỰ TẠO LẠI bảng nếu thiếu (kể cả khi file .db bị xóa lúc backend đang chạy)."""
+    conn = sqlite3.connect(DB_PATH)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS urgent_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            source TEXT NOT NULL,
+            sender TEXT NOT NULL,
+            content TEXT NOT NULL,
+            reason TEXT,
+            received_at TIMESTAMP DEFAULT (datetime('now', 'localtime'))
+        )
+    """)
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS counters (
+            name TEXT PRIMARY KEY,
+            value INTEGER NOT NULL DEFAULT 0
+        )
+    """)
+    conn.execute("INSERT OR IGNORE INTO counters (name, value) VALUES ('blocked', 0)")
+    conn.commit()
+    return conn
 
 
+def purge_old():
+    """Xóa tin khẩn cấp quá KEEP_DAYS ngày."""
+    with get_connection() as conn:
+        conn.execute(
+            "DELETE FROM urgent_logs WHERE received_at < datetime('now', ?, 'localtime')",
+            (f"-{KEEP_DAYS} days",),
+        )
+        conn.commit()
 
 
 def init_db():
-    db_exists = os.path.exists(DB_PATH)  # <-- Thêm kiểm tra tồn tại
-    with get_connection() as conn:
-        cursor = conn.cursor()
-        # BẢNG TIN NHẮN (Bổ sung cột session_id để biết tin nhắn thuộc phiên Live nào)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS message_logs (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                session_id INTEGER,
-                source TEXT NOT NULL,
-                sender TEXT NOT NULL,
-                content TEXT NOT NULL,
-                is_urgent INTEGER NOT NULL,
-                reason TEXT,
-                received_at TIMESTAMP DEFAULT (datetime('now', 'localtime'))
-            )
-        """)
-        # BẢNG PHIÊN LIVE (Lưu đúng Ngày + Giờ thực tế theo giờ máy tính 'localtime')
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS focus_sessions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                start_time TIMESTAMP DEFAULT (datetime('now', 'localtime')),
-                end_time TIMESTAMP,
-                duration_seconds INTEGER DEFAULT 0,
-                status TEXT DEFAULT 'ACTIVE'
-            )
-        """)
-        conn.commit()
-   
-    # <-- Thêm điều kiện if để chỉ in nếu DB mới được tạo
-    if not db_exists:
-        print(f"Đã khởi tạo cơ sỡ dữ liệu thành công tại: {DB_PATH}")
+    purge_old()   # get_connection đã tự tạo bảng; ở đây chỉ dọn tin cũ mỗi lần mở app
 
 
+init_db()
 
 
-# TỰ ĐỘNG GỌI HÀM KHỞI TẠO ĐỂ ĐẢM BẢO BẢNG LUÔN TỒN TẠI TRƯỚC KHI LƯU
-init_db()  # <-- Thêm gọi hàm tự động
+def _shift(name: str) -> str:
+    """Giống encrypt_sender_name ở analyzer.py, để lịch sử khớp với tên mã hóa analyzer tra."""
+    return "".join(c if c.isspace() else chr(ord(c) + 1) for c in name)
 
 
 def _notify_blocked():
-    """Báo cho api_server biết vừa có 1 tin bị chặn (thread riêng, lỗi thì bỏ qua)."""
     try:
         req = urllib.request.Request(
-            "http://127.0.0.1:8005/api/internal/blocked", data=b"", method="POST"
+            "http://127.0.0.1:8009/api/internal/blocked", data=b"", method="POST"
         )
         urllib.request.urlopen(req, timeout=1).read()
     except Exception:
         pass
-    
 
-def save_message(
-    source: str, sender: str, content: str, is_urgent: int, reason: str = "", session_id: int = None
-):
+
+def save_message(source: str, sender: str, content: str, is_urgent: int,
+                 reason: str = "", session_id: int = None):  # session_id giữ cho tương thích
     if sender == "SFIT" and source == "Smart focus isolation":
         return
-    with get_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute(
-            """
-            INSERT INTO message_logs (session_id, source, sender, content, is_urgent, reason)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """,
-            (session_id, source, sender, content, is_urgent, reason),
-        )
-        conn.commit()
-        
-    print(f"[DB Saved] [Session #{session_id}] {source} | Từ: {sender} | Gấp: {is_urgent}")
 
-    if is_urgent == 0:
+    with _lock:
+        _history.setdefault(_shift(sender), deque(maxlen=5)).append(content)
+
+    if is_urgent:
+        with get_connection() as conn:
+            conn.execute(
+                "INSERT INTO urgent_logs (source, sender, content, reason) VALUES (?, ?, ?, ?)",
+                (source, sender, content, reason),
+            )
+            conn.commit()
+        purge_old()
+    else:
         threading.Thread(target=_notify_blocked, daemon=True).start()
 
+    print(f"[Saved] {source} | Từ: {sender} | Gấp: {is_urgent}")
 
+
+def increment_blocked() -> int:
+    """Cộng 1 vào số tin chặn, trả về giá trị mới."""
+    with get_connection() as conn:
+        conn.execute("UPDATE counters SET value = value + 1 WHERE name = 'blocked'")
+        conn.commit()
+        return conn.execute("SELECT value FROM counters WHERE name = 'blocked'").fetchone()[0]
+
+
+def get_blocked_count() -> int:
+    with get_connection() as conn:
+        return conn.execute("SELECT value FROM counters WHERE name = 'blocked'").fetchone()[0]
 
 
 def get_recent_history(sender: str, limit: int = 5) -> str:
-    """Lấy N tin nhắn gần nhất của người gửi để làm ngữ cảnh cho AI"""
-    try:
-        with get_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                """
-                SELECT content FROM message_logs
-                WHERE sender = ?
-                ORDER BY id DESC LIMIT ?
-            """,
-                (sender, limit),
-            )
-            rows = cursor.fetchall()
-            if not rows:
-                return "Không có lịch sử trò chuyện trước đó."
-            # Đảo ngược lại đúng thứ tự thời gian
-            history = [r[0] for r in reversed(rows)]
-            return "\n".join([f"- {msg}" for msg in history])
-    except Exception as e:  # <-- Thêm as e
-        print(f"[LỖI ĐỌC DB]: {e}")  # <-- Thêm câu lệnh in lỗi
-        return ""
+    with _lock:
+        msgs = list(_history.get(sender, []))[-limit:]
+    if not msgs:
+        return "Không có lịch sử trò chuyện trước đó."
+    return "\n".join(f"- {m}" for m in msgs)
 
 
-
-
-def start_live_session() -> int:
-    """Tạo phiên Live mới (Đóng tất cả các phiên ACTIVE trôi nổi trước đó)"""
+def get_recent_urgent_logs(limit: int = 10) -> list:
+    purge_old()
     with get_connection() as conn:
-        cursor = conn.cursor()
-       
-        # Dọn sạch các phiên ACTIVE cũ (nếu có do sập server hoặc lỗi)
-        cursor.execute("""
-            UPDATE focus_sessions
-            SET end_time = datetime('now', 'localtime'),
-                duration_seconds = CAST((strftime('%s', datetime('now', 'localtime')) - strftime('%s', start_time)) AS INTEGER),
-                status = 'STOPPED'
-            WHERE status = 'ACTIVE'
-        """)
-       
-        # Tạo phiên mới
-        cursor.execute("INSERT INTO focus_sessions (status) VALUES ('ACTIVE')")
-        conn.commit()
-        return cursor.lastrowid
-
-
-def stop_live_session(session_id: int):
-    """Đóng phiên Live & Lưu GIỜ THỰC KẾT THÚC"""
-    with get_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("""
-            UPDATE focus_sessions
-            SET end_time = datetime('now', 'localtime'),
-                duration_seconds = CAST((strftime('%s', datetime('now', 'localtime')) - strftime('%s', start_time)) AS INTEGER),
-                status = 'STOPPED'
-            WHERE id = ?
-        """, (session_id,))
-        conn.commit()
-
-
-
-
-def get_session_messages(session_id: int) -> list:
-    """Hàm lấy toàn bộ tin nhắn thuộc một phiên Live cụ thể (Phục vụ AI tóm tắt sau này)"""
-    with get_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute("""
-            SELECT source, sender, content, is_urgent, reason, received_at
-            FROM message_logs
-            WHERE session_id = ?
-            ORDER BY id ASC
-        """, (session_id,))
-        rows = cursor.fetchall()
-        return rows
-
-
-
-
-# if __name__ == "__main__":
-#     # Chạy thử hàm tạo DB và thêm thử 1 dòng dữ liệu (Mock data)
-#     init_db()
-#     save_message(
-#         source="Zalo",
-#         sender="Thầy A",
-#         content="Nộp bài tập C++ gấp trước 5h",
-#         is_urgent=1,
-#         reason="Chứa từ khóa ưu tiên và mốc thời gian",
-#     )
-
+        rows = conn.execute(
+            """SELECT id, source, sender, content, reason,
+                      strftime('%H:%M', received_at), received_at
+               FROM urgent_logs ORDER BY id DESC LIMIT ?""",
+            (limit,),
+        ).fetchall()
+    return [
+        {"id": r[0], "source": r[1], "sender": r[2], "content": r[3],
+         "reason": r[4], "time_str": r[5], "received_at": r[6]}
+        for r in rows
+    ]

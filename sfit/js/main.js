@@ -5,7 +5,7 @@
 
   try {
     // 1. Lấy dữ liệu từ Backend
-    const response = await fetch("http://127.0.0.1:8005/api/config");
+    const response = await fetch("http://127.0.0.1:8009/api/config");
     if (response.ok) {
       const data = await response.json();
 
@@ -21,7 +21,7 @@
   S.updateConnected();
 
   // 4. Pill Blocked: nghe backend đẩy sự kiện, tự +1 khi có tin bị chặn
-  var es = new EventSource("http://127.0.0.1:8005/api/events");
+  var es = new EventSource("http://127.0.0.1:8009/api/events");
   es.onopen = S.syncBlocked; // lấy số gốc lúc kết nối (và cả khi tự kết nối lại)
   es.onmessage = function (e) {
     if (e.data === "blocked") {
