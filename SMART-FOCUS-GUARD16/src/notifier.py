@@ -132,7 +132,10 @@ def _popup_manager_process():
             
             self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Tool)
             self.setAttribute(Qt.WA_TranslucentBackground)
-            self.setCursor(Qt.PointingHandCursor)
+            if self.source_app == "Smart focus isolation" and not self.deep_link:
+                self.setCursor(Qt.ArrowCursor)
+            else:
+                self.setCursor(Qt.PointingHandCursor)
             
             k = POPUP_SCALE
             S = lambda v: max(1, int(round(v * k)))
@@ -203,6 +206,7 @@ def _popup_manager_process():
 
             close_btn = QPushButton()
             close_btn.setObjectName("CloseBtn")
+            close_btn.setCursor(Qt.PointingHandCursor)
             close_btn.setFixedSize(S(50), S(50))
             close_btn.setIcon(make_close_icon())
             close_btn.setIconSize(QSize(S(24), S(24)))
@@ -294,6 +298,9 @@ def _popup_manager_process():
             self.appear_anim.start()
 
         def mousePressEvent(self, event):
+            # Chỉ cho phép tắt bằng nút X đối với popup Start Focus và popup Kết thúc (đã tắt DND)
+            if self.source_app == "Smart focus isolation" and not self.deep_link:
+                return
             if event.button() == Qt.LeftButton:
                 if self._is_clicking:
                     return

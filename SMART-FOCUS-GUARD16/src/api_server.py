@@ -66,7 +66,7 @@ async def start_collector():
         trigger_alert(
             source="Smart focus isolation",
             sender="SFIT",
-            content="Hệ thống đã bắt đầu hoạt động, chúc bạn một phiên tập trung hiệu quả",
+            content="Hệ thống đã bắt đầu hoạt động, chúc bạn một phiên tập trung hiệu quả.",
             is_urgent=1,
             reason="Khởi động phiên",
         )
@@ -89,7 +89,7 @@ async def stop_collector():
             msg = "Chúc mừng bạn đã hoàn thành phiên tập trung ! Hãy nhấn vào popup để tắt chế độ DND."
             link = "ms-settings:notifications"
         else:
-            msg = "Chúc mừng bạn đã hoàn thành phiên tập trung !."
+            msg = "Chúc mừng bạn đã hoàn thành phiên tập trung !"
             link = ""
 
         trigger_alert(

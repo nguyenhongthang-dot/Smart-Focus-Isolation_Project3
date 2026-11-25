@@ -2,7 +2,7 @@
   "sources": {
     "Zalo": true,
     "Messenger/facebook": true,
-    "Gmail": false,
+    "Gmail": true,
     "Discord": true
   },
   "keywords": [

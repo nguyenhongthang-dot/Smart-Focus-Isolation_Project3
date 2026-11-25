@@ -1,3 +1,6 @@
+
+# BAN CAP NHAT
+
 from pycaw.pycaw import AudioUtilities
 
 sessions = AudioUtilities.GetAllSessions()
