@@ -16,7 +16,7 @@
   // THÊM HÀM NÀY ĐỂ GỌI BACKEND
   async function triggerBackend(action) {
     try {
-      await fetch("http://127.0.0.1:8009/api/collector/" + action, {
+      await fetch("http://127.0.0.1:8010/api/collector/" + action, {
         method: "POST",
       });
     } catch (e) {
@@ -225,6 +225,12 @@
       class: "start",
       onclick: function () {
         setRun(!T.run);
+        if (T.run) {
+          // chỉ nhún khi vừa bấm sang trạng thái chạy (Start/Continue)
+          S.ui.start.classList.remove("pop");
+          void S.ui.start.offsetWidth; // trigger lại animation
+          S.ui.start.classList.add("pop");
+        }
       },
     });
     S.ui.reset = h("button", {

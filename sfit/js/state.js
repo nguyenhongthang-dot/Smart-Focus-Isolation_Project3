@@ -53,7 +53,7 @@
 
   S.syncBlocked = async function () {
     try {
-      var res = await fetch("http://127.0.0.1:8009/api/stats");
+      var res = await fetch("http://127.0.0.1:8010/api/stats");
       if (!res.ok) return;
       var data = await res.json();
       S.blockedCount = data.today.blocked;

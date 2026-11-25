@@ -68,7 +68,7 @@ def _shift(name: str) -> str:
 def _notify_blocked():
     try:
         req = urllib.request.Request(
-            "http://127.0.0.1:8009/api/internal/blocked", data=b"", method="POST"
+            "http://127.0.0.1:8010/api/internal/blocked", data=b"", method="POST"
         )
         urllib.request.urlopen(req, timeout=1).read()
     except Exception:

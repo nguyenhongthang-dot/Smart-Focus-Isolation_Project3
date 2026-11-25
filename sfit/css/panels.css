@@ -106,7 +106,6 @@ h3 {
   width: 50px;
   height: 24px;
   border-radius: 999px;
-  background: #fff;
   position: relative;
   border: 1.5px solid #fff;
   flex: none;
@@ -120,7 +119,7 @@ h3 {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #bbb;
+  background: #fff;
   transition: 0.2s;
 }
 .sw.on {

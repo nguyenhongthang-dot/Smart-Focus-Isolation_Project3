@@ -199,6 +199,10 @@
   color: #111;
   font-weight: 700;
   border-color: #fff;
+}
+
+/* THÊM khối mới này */
+.start.pop {
   animation: pop 0.25s ease;
 }
 

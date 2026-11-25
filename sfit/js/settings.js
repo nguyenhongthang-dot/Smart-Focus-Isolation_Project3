@@ -106,7 +106,7 @@
           keywords: state.kws,
         };
 
-        const response = await fetch("http://127.0.0.1:8009/api/config", {
+        const response = await fetch("http://127.0.0.1:8010/api/config", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
