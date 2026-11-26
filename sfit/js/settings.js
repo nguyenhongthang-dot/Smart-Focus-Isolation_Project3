@@ -144,7 +144,7 @@
       ]),
       h("div", { class: "acts" }, [
         themeBox,
-        h("div", { class: "lang" }, [bVi, bEn]),
+        h("div", { class: "lang" }, [bEn, bVi]),
         save,
       ]),
     ]);

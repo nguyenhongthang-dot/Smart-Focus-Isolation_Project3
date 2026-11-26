@@ -18,6 +18,7 @@
   height: 100%;
   overflow: visible;
 }
+
 .in {
   position: absolute;
   inset: 0;
@@ -25,7 +26,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: calc(var(--s) * 0.035);
+  gap: calc(var(--s) * 0.02);
+  --row-h: calc(var(--s) * 0.06); /* chiều cao của ô Select a task */
 }
 
 /* MỚI: hiệu ứng nhún 1 cái */
@@ -45,7 +47,6 @@
 }
 
 /* Timer / Stopwatch */
-/* Timer / Stopwatch */
 /* Khung chứa 2 nút */
 .seg {
   position: relative;
@@ -56,6 +57,8 @@
   padding: calc(var(--s) * 0.005);
   background: rgba(0, 0, 0, 0.15);
   isolation: isolate; /* Tạo lớp layer riêng */
+  /* DỜI RIÊNG khung Timer/Stopwatch: số dương = xuống, số âm = lên */
+  top: calc(var(--s) * 0.03);
 }
 
 /* THỎI MÀU VÀNG CHẠY QUA CHẠY LẠI */
@@ -111,45 +114,6 @@
   cursor: not-allowed;
 }
 
-/* Study / Work / Read */
-.modes {
-  display: flex;
-  gap: calc(var(--s) * 0.098);
-  margin-top: calc(var(--s) * 0.01);
-}
-.modes button {
-  width: calc(var(--s) * 0.2);
-  padding: calc(var(--s) * 0.009) 0; /* dẹp lại */
-  border: 2px solid #fff;
-  border-radius: 4px;
-  background: rgba(
-    0,
-    0,
-    0,
-    0.15
-  ); /* nền tối khi đè lên vùng sáng */
-  color: #fff;
-  font-family: Inter, sans-serif;
-  font-weight: 400; /* mặc định nét mỏng */
-  font-size: calc(var(--s) * 0.03);
-  line-height: 1.2;
-  transition: 0.15s;
-}
-.modes button.on {
-  background: var(--y);
-  color: #111; /* chữ đen */
-  font-weight: 600; /* chỉ khi chọn mới đậm */
-  border-color: #fff; /* viền vẫn trắng, không đổi sang vàng */
-}
-
-/* Nút bị mờ như "Read" */
-.modes button.dim,
-.modes button:disabled {
-  color: rgba(255, 255, 255, 0.65);
-  background: rgba(0, 0, 0, 0.15);
-  cursor: not-allowed;
-}
-
 .clock {
   font-family: Inter;
   font-weight: 800;
@@ -188,12 +152,12 @@
   font-size: calc(var(--s) * 0.035);
   background: rgba(0, 0, 0, 0.15);
   font-weight: 400;
-  outline: none; /* MỚI */
-  -webkit-tap-highlight-color: transparent; /* MỚI */
-  transition: 0.15s; /* MỚI */
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: 0.15s;
 }
 
-/* MỚI: nút Start/Pause khi đang chạy: nền vàng, chữ đen, viền trắng, nhún 1 cái */
+/* Nút Start/Pause khi đang chạy: nền vàng, chữ đen, viền trắng, nhún 1 cái */
 .start.on {
   background: var(--y);
   color: #111;
@@ -201,7 +165,6 @@
   border-color: #fff;
 }
 
-/* THÊM khối mới này */
 .start.pop {
   animation: pop 0.25s ease;
 }
@@ -219,7 +182,7 @@
   width: 55%;
   height: 55%;
 }
-/* MỚI: Reset mờ khi chưa bấm Start (giống nút đồng hồ cát khi bị khóa) */
+/* Reset mờ khi chưa bấm Start */
 .reset:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -235,33 +198,35 @@
 
 /* Gộp tất cả các nút ở màn hình chính, thanh menu bên trái và nút loa */
 .seg button:hover:not(.on),
-.modes button:hover:not(.on),
 .start:hover:not(.on),
 .side button:hover:not(.on) {
   background: rgba(0, 0, 0, 0.2) !important;
 }
 
-/* 1. Thêm hiệu ứng chuyển động mượt cho các nút ở trạng thái bình thường */
+/* Hiệu ứng chuyển động mượt cho các nút */
 .clock .hg,
 .reset,
 .btn,
 .vol-left {
-  transition: transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
-/* 2. Khi hover: Đổi màu, phóng to nhẹ (scale) và thêm bóng đổ (box-shadow) để tạo cảm giác nổi lên */
+/* Hover: đổi màu + phóng to nhẹ */
 .clock .hg:hover:not(:disabled),
 .reset:hover:not(:disabled),
 .vol-left:hover {
   background: #ffbd1f !important;
-  transform: scale(1.08); /* Phóng to nút lên 108% (chỉnh thành 1.05 nếu muốn phóng nhỏ hơn) */
+  transform: scale(1.08);
 }
 
 .btn:hover {
   background: #ffbd1f !important;
   transform: scale(1.08);
-  color: #111 !important; /* Đổi màu chữ sang đen khi hover */
-  font-weight: 600; /* Đổi chữ sang đậm khi hover */
+  color: #111 !important;
+  font-weight: 600;
 }
 
 /* ===== Hộp nhập giờ (Set time) ===== */
@@ -273,7 +238,7 @@
   padding: calc(var(--s) * 0.022) calc(var(--s) * 0.03) calc(var(--s) * 0.03);
   border-radius: calc(var(--s) * 0.025);
   background: #000;
-  z-index: 10;
+  z-index: 30; /* SỬA: cao hơn .task-wrap (20) để hộp nhập giờ luôn nằm trên */
   opacity: 0;
   pointer-events: none;
   transform: translate(-50%, -50%) scale(0.96);
@@ -341,7 +306,7 @@
 .tm-input:focus-visible {
   outline: none !important; /* tắt viền trắng của base.css */
   border-color: var(--y); /* viền vàng */
-  box-shadow: 0 0 0 1px var(--y); /* làm viền vàng dày hơn, bỏ dòng này nếu không cần */
+  box-shadow: 0 0 0 1px var(--y);
 }
 
 .tm-input::placeholder {
@@ -376,11 +341,214 @@
   }
 }
 
-/* Làm tối màn hình khi mở hộp nhập giờ 
+.task-wrap {
+  position: relative;
+  width: calc(var(--s) * 0.75); /* chiều RỘNG của ô Select a task */
+  height: var(--row-h); /* chiều CAO của ô Select a task */
+  /* khoảng cách từ Timer/Stopwatch xuống ô Select a task (0.05 bù cho top của .seg) */
+  margin-top: calc(var(--s) * 0.05);
+  flex: none;
+  z-index: 20;
+}
+.task-btn {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--s) * 0.015);
+  padding: 0 calc(var(--s) * 0.06);
+  border: none;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.17);
+  color: #fff;
+  font-family: Inter, sans-serif;
+  font-weight: 700;
+  font-size: calc(var(--s) * 0.032);
+  line-height: 1.2;
+  transition: background 0.2s ease;
+}
+
+.task-btn:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+.task-dot {
+  display: inline-block;
+  width: calc(var(--s) * 0.024);
+  height: calc(var(--s) * 0.024);
+  border-radius: 4px;
+  flex: none;
+}
+/* tên task dài thì cắt bằng ... , không tràn ra ngoài ô */
+.task-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* mũi tên nằm sát mép phải, chữ vẫn căn giữa */
+.task-chev {
+  position: absolute;
+  right: calc(var(--s) * 0.025);
+  top: 50%;
+  width: calc(var(--s) * 0.035);
+  height: calc(var(--s) * 0.035);
+  margin-top: calc(var(--s) * -0.0175);
+  display: grid;
+  transition: transform 0.2s ease;
+}
+.task-chev svg {
+  width: 100%;
+  height: 100%;
+}
+.task-wrap.open .task-chev {
+  transform: rotate(180deg);
+}
+
+/* menu xổ xuống */
+.task-menu {
+  position: absolute;
+  top: calc(100% + var(--s) * 0.01);
+  left: 0;
+  right: 0;
+  padding: calc(var(--s) * 0.01);
+  border-radius: calc(var(--s) * 0.02);
+  background: #111;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--s) * 0.004);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-6px);
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+  max-height: calc(var(--s) * 0.35);
+  overflow-y: auto;
+}
+.task-wrap.open .task-menu {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+.task-item {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--s) * 0.01);
+  padding: calc(var(--s) * 0.012) calc(var(--s) * 0.015);
+  border-radius: calc(var(--s) * 0.012);
+  color: #fff;
+  font-family: Inter, sans-serif;
+  font-weight: 600;
+  font-size: calc(var(--s) * 0.026);
+  text-align: left;
+  cursor: pointer;
+}
+.task-item:hover,
+.task-item.on {
+  background: rgba(255, 255, 255, 0.16);
+}
+/* nút + Add Task: to hơn, dễ bấm */
+.task-add {
+  width: 100%;
+  box-sizing: border-box;
+  padding: calc(var(--s) * 0.01) calc(var(--s) * 0.01); /* ← tăng số này = nút cao hơn */
+  border-radius: calc(var(--s) * 0.012);
+  color: rgba(255, 255, 255, 0.75);
+  font-family: Inter, sans-serif;
+  font-weight: 600;
+  font-size: calc(var(--s) * 0.02); /* ← tăng số này = chữ to hơn */
+  text-align: center;
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+.task-add:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+/* tên task: chiếm hết chỗ trống, quá dài thì hiện ... */
+.task-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ô nhập tên task (khi thêm / sửa) */
+.task-new {
+  width: 100%;
+  box-sizing: border-box;
+  padding: calc(var(--s) * 0.012) calc(var(--s) * 0.018);
+  border: 1.5px solid #383531;
+  border-radius: calc(var(--s) * 0.012);
+  background: #000;
+  color: #fff;
+  font-family: Inter, sans-serif;
+  font-weight: 600;
+  font-size: calc(var(--s) * 0.026);
+  line-height: 1.2;
+  outline: none;
+  caret-color: var(--y);
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+.task-new::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 400;
+}
+.task-new:focus,
+.task-new:focus-visible {
+  outline: none !important;
+  border-color: var(--y);
+  background: #383531;
+  box-shadow: 0 0 0 1px var(--y);
+}
+
+/* nút sửa (bút chì) và xóa (thùng) */
+.task-act {
+  flex: none;
+  width: calc(var(--s) * 0.032);
+  height: calc(var(--s) * 0.032);
+  padding: 0;
+  border: none;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+.task-act svg {
+  width: 100%;
+  height: 100%;
+}
+.task-act:hover {
+  color: var(--y);
+  transform: scale(1.15);
+}
+
+.task-act {
+  opacity: 0;
+}
+.task-item:hover .task-act {
+  opacity: 1;
+}
+
+/* Làm tối màn hình khi mở hộp nhập giờ (đang tắt)
 .tm-modal.show {
   box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.6);
 }
 .stage:has(.tm-modal.show) {
-  z-index: 4; 
-} 
-
+  z-index: 4;
+} */

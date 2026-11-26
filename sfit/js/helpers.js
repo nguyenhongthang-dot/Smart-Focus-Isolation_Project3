@@ -1,4 +1,4 @@
-/* Hàm tiện ích: h() tạo phần tử DOM, pad(), fmt() */
+/* Hàm tiện ích: h() tạo phần tử DOM, pad(), fmt() hi hi */
 (function () {
   "use strict";
   var S = window.SFIT;
@@ -17,9 +17,7 @@
       }
     (children || []).forEach(function (c) {
       if (c == null) return;
-      el.appendChild(
-        typeof c === "string" ? document.createTextNode(c) : c,
-      );
+      el.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
     });
     return el;
   }

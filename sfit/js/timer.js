@@ -11,6 +11,17 @@
   /* ---------- Timer ---------- */
   var T = state.timer;
   T.started = false; // MỚI: đã bấm Start và chưa Reset (kể cả đang Pause)
+  /* MỚI: chế độ hiển thị + danh sách task */
+  T.task = null; // tên task đang chọn
+  T.tasks = []; // SỬA: danh sách trống, không còn Study/Work/Read mặc định
+  var menuOpen = false;
+  var CHEVRON_ICON =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>';
+  /* MỚI: icon sửa (bút chì) và xóa (thùng) cho từng task */
+  var EDIT_ICON =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1 11-11a2.1 2.1 0 0 0-3-3L5 16l-1 4z"/></svg>';
+  var DEL_ICON =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="5" rx="1"/><path d="M5 9v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9M12 11v5M9.5 13.5L12 16l2.5-2.5"/></svg>';
   var tick = null;
   var finishTimer = null; // MỚI: chờ 1,5s sau khi hết giờ rồi mới reset về mặc định
   // THÊM HÀM NÀY ĐỂ GỌI BACKEND
@@ -160,6 +171,116 @@
     paintTimer(); // hiện số lên màn hình, bấm Start focus để đếm ngược
   }
 
+  /* ---------- MỚI: Select a task (giống Select a tag của StudyFoc.us) ---------- */
+  function setMenu(v) {
+    menuOpen = v;
+    S.ui.taskWrap.classList.toggle("open", v);
+    if (v) renderTaskMenu();
+  }
+
+  function renderTaskMenu() {
+    var m = S.ui.taskMenu;
+    m.innerHTML = "";
+
+    T.tasks.forEach(function (name, idx) {
+      var row = document.createElement("div");
+      row.className = "task-item" + (T.task === name ? " on" : "");
+
+      var label = document.createElement("span");
+      label.className = "task-name";
+      label.textContent = name;
+
+      var edit = document.createElement("button");
+      edit.className = "task-act";
+      edit.title = "Edit";
+      edit.innerHTML = EDIT_ICON;
+
+      var del = document.createElement("button");
+      del.className = "task-act";
+      del.title = "Delete";
+      del.innerHTML = DEL_ICON;
+
+      /* chọn task */
+      row.onclick = function (e) {
+        e.stopPropagation();
+        T.task = name;
+        setMenu(false);
+        paintTimer();
+      };
+
+      /* sửa tên task */
+      edit.onclick = function (e) {
+        e.stopPropagation();
+        var inp = document.createElement("input");
+        inp.className = "task-new";
+        inp.maxLength = 100;
+        inp.value = name;
+        inp.onclick = function (ev) {
+          ev.stopPropagation();
+        };
+        inp.onkeydown = function (ev) {
+          if (ev.key === "Enter") {
+            var n = inp.value.trim();
+            if (!n || (n !== name && T.tasks.indexOf(n) !== -1)) return;
+            if (T.task === name) T.task = n;
+            T.tasks[idx] = n;
+            renderTaskMenu();
+            paintTimer();
+          } else if (ev.key === "Escape") {
+            renderTaskMenu();
+          }
+        };
+        m.replaceChild(inp, row);
+        inp.focus();
+        inp.select();
+      };
+
+      /* xóa task */
+      del.onclick = function (e) {
+        e.stopPropagation();
+        T.tasks.splice(idx, 1);
+        if (T.task === name) T.task = null;
+        renderTaskMenu();
+        paintTimer();
+      };
+
+      row.appendChild(label);
+      row.appendChild(edit);
+      row.appendChild(del);
+      m.appendChild(row);
+    });
+
+    /* thêm task mới */
+    var add = document.createElement("button");
+    add.className = "task-add";
+    add.textContent = "+ Add task";
+    add.onclick = function (e) {
+      e.stopPropagation();
+      var inp = document.createElement("input");
+      inp.className = "task-new";
+      inp.maxLength = 100;
+      inp.placeholder = "Task name...";
+      inp.onclick = function (ev) {
+        ev.stopPropagation();
+      };
+      inp.onkeydown = function (ev) {
+        if (ev.key === "Enter") {
+          var n = inp.value.trim();
+          if (!n || T.tasks.indexOf(n) !== -1) return;
+          T.tasks.push(n);
+          T.task = n;
+          setMenu(false);
+          paintTimer();
+        } else if (ev.key === "Escape") {
+          setMenu(false);
+        }
+      };
+      m.replaceChild(inp, add);
+      inp.focus();
+    };
+    m.appendChild(add);
+  }
+
   function buildTimer() {
     var R = 330,
       C = 350;
@@ -174,14 +295,14 @@
       C +
       '" r="' +
       R +
-      '" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="5"/>' +
+      '" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="10"/>' +
       '<circle id="arc" cx="' +
       C +
       '" cy="' +
       C +
       '" r="' +
       R +
-      '" fill="none" stroke="#fff" stroke-opacity=".9" stroke-width="5" pathLength="100" transform="rotate(-90 ' +
+      '" fill="none" stroke="#fff" stroke-opacity=".9" stroke-width="10" pathLength="100" transform="rotate(-90 ' +
       C +
       " " +
       C +
@@ -199,15 +320,6 @@
       onclick: function () {
         switchMode("stop");
       },
-    });
-    S.ui.cats = ["Study", "Work", "Read"].map(function (m) {
-      return h("button", {
-        text: m,
-        onclick: function () {
-          T.cat = m;
-          paintTimer();
-        },
-      });
     });
     S.ui.time = document.createTextNode("");
     S.ui.hg = h("button", {
@@ -240,9 +352,33 @@
       onclick: reset,
     });
 
+    /* MỚI: ô Select a task */
+    S.ui.taskLabel = h("span", { class: "task-label", text: "Select a task" });
+    S.ui.taskBtn = h(
+      "button",
+      {
+        class: "task-btn",
+        onclick: function (e) {
+          e.stopPropagation();
+          setMenu(!menuOpen);
+        },
+      },
+      [S.ui.taskLabel, h("span", { class: "task-chev", html: CHEVRON_ICON })],
+    );
+    S.ui.taskMenu = h("div", { class: "task-menu" });
+    S.ui.taskWrap = h("div", { class: "task-wrap" }, [
+      S.ui.taskBtn,
+      S.ui.taskMenu,
+    ]);
+
+    /* bấm ra ngoài thì đóng menu */
+    document.addEventListener("click", function (e) {
+      if (menuOpen && !S.ui.taskWrap.contains(e.target)) setMenu(false);
+    });
+
     var inner = h("div", { class: "in" }, [
       h("div", { class: "seg" }, [S.ui.btnTimer, S.ui.btnStop]),
-      h("div", { class: "modes" }, S.ui.cats),
+      S.ui.taskWrap, // MỚI
       S.ui.clock,
       S.ui.start,
       S.ui.reset,
@@ -337,9 +473,7 @@
 
     S.ui.btnTimer.classList.toggle("on", T.mode === "timer");
     S.ui.btnStop.classList.toggle("on", T.mode === "stop");
-    S.ui.cats.forEach(function (b) {
-      b.classList.toggle("on", b.textContent === T.cat);
-    });
+    S.ui.taskLabel.textContent = T.task || "Select a task";
     S.ui.time.nodeValue = fmt(shown);
     S.ui.hg.style.display = T.mode === "timer" ? "" : "none";
     S.ui.hg.disabled = T.started; // chìm khi đang chạy HOẶC đang Pause
