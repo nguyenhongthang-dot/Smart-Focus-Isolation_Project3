@@ -425,7 +425,7 @@ body:has(.tabh) .btn {
   opacity: 0.7; /* (Tùy chọn) Độ mờ để phân biệt với chữ người dùng gõ thật */
 }
 /* ===== NÚT SENT ===== */
-.sent {
+.send {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -448,7 +448,7 @@ body:has(.tabh) .btn {
 }
 
 /* chỉ chuột vào -> phình ra + vàng */
-.sent:hover {
+.send:hover {
   transform: scale(1.12);
   background: var(--y);
   border-color: var(--y);
@@ -457,21 +457,21 @@ body:has(.tabh) .btn {
 }
 
 /* icon tick mặc định ẩn */
-.sent .tick {
+.send .tick {
   display: none;
 }
 
 /* bấm xong -> ẩn chữ, hiện tick */
-.sent.done {
+.send.done {
   background: var(--y);
   border-color: var(--y);
   color: #111;
   border: 2px solid #fff;
 }
-.sent.done .lbl {
+.send.done .lbl {
   display: none;
 }
-.sent.done .tick {
+.send.done .tick {
   display: block;
 }
 

@@ -120,6 +120,8 @@
           save.disabled = true;
           save.classList.remove("unsaved", "shake");
           S.updateConnected();
+          S.activeLang = state.lang; // THÊM
+          S.applyLang();
         } else {
           save.textContent = "API Error";
         }

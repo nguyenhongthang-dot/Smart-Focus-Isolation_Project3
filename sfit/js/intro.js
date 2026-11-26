@@ -34,16 +34,15 @@
     });
     // ---------------------------------------------------------------------
 
-    var sent = h("button", { class: "sent", type: "button" });
-    sent.innerHTML =
-      '<span class="lbl">Sent</span>' +
+    var send = h("button", { class: "send", type: "button" });
+    send.innerHTML =
+      '<span class="lbl">Send</span>' +
       '<svg class="tick" viewBox="0 0 20 20" width="18" height="18">' +
       '<circle cx="10" cy="10" r="10" fill="#fff"/>' +
       '<path d="M4.5 10.5l3.5 3.5 7.5-8" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>' +
       "</svg>";
 
-    sent.addEventListener("click", function () {
-
+    send.addEventListener("click", function () {
       var content = fbInput.value.trim();
       // --- PHẦN THÊM MỚI: Chặn gửi nếu ô input trống hoặc chỉ chứa khoảng trắng ---
       if (!content) {
@@ -53,35 +52,35 @@
       // ------------------------------------------------------------------
 
       // 1. Đổi chữ nút thành "Sending..." (Tùy chọn) để báo hiệu đang gửi
-      sent.querySelector(".lbl").textContent = "Sending...";
+      send.querySelector(".lbl").textContent = "Sending...";
 
       // 2. Dùng Fetch API để gọi ngầm lên Google Script
       fetch(GOOGLE_SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors', // Rất quan trọng để không bị lỗi bảo mật CORS của trình duyệt
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: 'feedback=' + encodeURIComponent(content) // Đẩy nội dung vào biến feedback
+        method: "POST",
+        mode: "no-cors", // Rất quan trọng để không bị lỗi bảo mật CORS của trình duyệt
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: "feedback=" + encodeURIComponent(content), // Đẩy nội dung vào biến feedback
       })
-      .then(function() {
+        .then(function () {
           // 3. Khi gửi thành công
-          sent.classList.add("done");
-          
+          send.classList.add("done");
+
           fbInput.value = "";
           S.state.fbDraft = "";
-          
+
           // Trả lại trạng thái sau 2s
           setTimeout(function () {
-            sent.classList.remove("done");
-            sent.querySelector(".lbl").textContent = "Sent"; // Trả lại chữ Sent
+            send.classList.remove("done");
+            send.querySelector(".lbl").textContent = "Send"; // Trả lại chữ Send
           }, 2000);
-      })
-      .catch(function(error) {
+        })
+        .catch(function (error) {
           console.error("Lỗi gửi feedback:", error);
           alert("Lỗi mạng, không thể gửi feedback lúc này!");
-          sent.querySelector(".lbl").textContent = "Sent";
-      });
+          send.querySelector(".lbl").textContent = "Send";
+        });
     });
 
     var panel = h("div", { class: "panel" }, [
@@ -94,7 +93,7 @@
       }),
       rules,
       fbInput, // Đưa biến fbInput vào đây thay cho dòng h("input", ...) cũ
-      sent,
+      send,
     ]);
 
     return [tabh, panel];

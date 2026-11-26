@@ -1,4 +1,4 @@
-/* Hàm tiện ích: h() tạo phần tử DOM, pad(), fmt() hi hi */
+/* Hàm tiện ích: h() tạo phần tử DOM, pad(), fmt() hi hi2 */
 (function () {
   "use strict";
   var S = window.SFIT;
