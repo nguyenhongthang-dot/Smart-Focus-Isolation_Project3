@@ -4,6 +4,44 @@
   --glass: rgba(80, 35, 0, 0.34);
   --line: rgba(255, 255, 255, 0.85);
   box-sizing: border-box;
+
+  /* ===== Màu theo theme (Desert = màu gốc) ===== */
+  --y-soft: #ffe79a;
+  --pill-val: #ffe79a;
+  --pill-label: #fff;
+  --y-mid: #ff9a1f;
+  --sw-on: #f25c05;
+  --ur: #fff08c;
+  --panel: rgba(0, 0, 0, 0.15);
+  --page: #3a1c00;
+  --tint: rgba(90, 40, 0, 0.22);
+  --bg-img: url(../assets/bg.jpg);
+  --modal: #000;
+  --menu: #111;
+  --field: #000;
+  --field-line: #383531;
+  --field-focus: #383531;
+}
+
+/* ===== Theme Pond ===== */
+:root[data-theme="pond"] {
+  --y: #91c3c0;
+  --y-soft: #91c3c0;
+  --pill-val: #81cdcd;
+  --pill-label: #ffffff;
+  --h3: #bdfaf6;
+  --y-mid: #5899a0;
+  --sw-on: #138d83;
+  --ur: #91c3c0;
+  --panel: rgba(0, 0, 0, 0.29);
+  --page: #112138;
+  --tint: rgba(17, 33, 56, 0.15);
+  --bg-img: url(../assets/Pond.png);
+  --modal: #112138;
+  --menu: #335d83;
+  --field: #335d83;
+  --field-line: #1e5475;
+  --field-focus: #547797;
 }
 * {
   box-sizing: border-box;
@@ -15,7 +53,7 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #3a1c00;
+  background: var(--page);
 }
 body {
   font-family: "Plus Jakarta Sans", "Inter", system-ui, sans-serif;
@@ -39,15 +77,14 @@ input:focus-visible {
   inset: 0;
   width: 100vw;
   height: 100vh;
-  background: url(../assets/bg.jpg)
-    center/cover no-repeat;
+  background: var(--bg-img) center/cover no-repeat;
   overflow: hidden;
 }
 .app:before {
   content: "";
   position: absolute;
   inset: 0;
-  background: rgba(90, 40, 0, 0.22);
+  background: var(--tint);
 }
 .app > * {
   position: absolute;

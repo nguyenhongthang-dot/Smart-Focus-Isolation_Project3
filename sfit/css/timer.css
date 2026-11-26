@@ -218,12 +218,12 @@
 .clock .hg:hover:not(:disabled),
 .reset:hover:not(:disabled),
 .vol-left:hover {
-  background: #ffbd1f !important;
+  background: var(--y) !important;
   transform: scale(1.08);
 }
 
 .btn:hover {
-  background: #ffbd1f !important;
+  background: var(--y) !important;
   transform: scale(1.08);
   color: #111 !important;
   font-weight: 600;
@@ -237,7 +237,7 @@
   width: calc(var(--s) * 0.8);
   padding: calc(var(--s) * 0.022) calc(var(--s) * 0.03) calc(var(--s) * 0.03);
   border-radius: calc(var(--s) * 0.025);
-  background: #000;
+  background: var(--modal);
   z-index: 30; /* SỬA: cao hơn .task-wrap (20) để hộp nhập giờ luôn nằm trên */
   opacity: 0;
   pointer-events: none;
@@ -320,10 +320,10 @@
   min-height: 1em;
   margin-top: calc(var(--s) * 0.012);
   font-size: calc(var(--s) * 0.02);
-  color: #ffbd1f;
+  color: var(--y);
 }
 .tm-modal.err .tm-input {
-  border-color: #ffbd1f;
+  border-color: var(--y);
 }
 .tm-modal.err {
   animation: tm-shake 0.3s;
@@ -417,7 +417,7 @@
   right: 0;
   padding: calc(var(--s) * 0.01);
   border-radius: calc(var(--s) * 0.02);
-  background: #111;
+  background: var(--menu);
   display: flex;
   flex-direction: column;
   gap: calc(var(--s) * 0.004);
@@ -487,9 +487,9 @@
   width: 100%;
   box-sizing: border-box;
   padding: calc(var(--s) * 0.012) calc(var(--s) * 0.018);
-  border: 1.5px solid #383531;
+  border: 1.5px solid var(--field-line);
   border-radius: calc(var(--s) * 0.012);
-  background: #000;
+  background: var(--field);
   color: #fff;
   font-family: Inter, sans-serif;
   font-weight: 600;
@@ -509,7 +509,7 @@
 .task-new:focus-visible {
   outline: none !important;
   border-color: var(--y);
-  background: #383531;
+  background: var(--field-focus);
   box-shadow: 0 0 0 1px var(--y);
 }
 

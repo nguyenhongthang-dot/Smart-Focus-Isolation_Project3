@@ -5,6 +5,17 @@
   var h = S.h,
     state = S.state;
 
+  /* Áp theme (chỉ đổi màu/ảnh nền qua biến CSS) */
+  function applyTheme(t) {
+    document.documentElement.setAttribute("data-theme", t || "desert");
+  }
+  S.applyTheme = applyTheme;
+  /* Mở app lên: áp theme đã lưu */
+  try {
+    var savedCfg = JSON.parse(localStorage.getItem("sfit-settings") || "{}");
+    applyTheme(savedCfg.theme);
+  } catch (e) {}
+
   var SUB = {
     Zalo: "Messaging application",
     "Messenger/facebook": "Social network",
@@ -98,6 +109,7 @@
             theme: state.theme,
           }),
         );
+        S.applyTheme(state.theme); // áp theme ngay khi bấm Save
 
         // 2. Gửi Data Sources và Keywords xuống Backend để lưu vào config.json
         // Chú ý: Backend (analyzer.py) dùng key là 'keywords' thay vì 'kws'
