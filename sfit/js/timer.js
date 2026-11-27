@@ -440,7 +440,10 @@
   function paintFocusIcon() {
     var ico = document.getElementById("ico-fire");
     if (!ico) return;
-    var key = T.started ? "fire2" : "fire";
+    var theme = document.documentElement.getAttribute("data-theme");
+    var img = "fire2";
+    if (theme == "pond") img = "fire3";
+    var key = T.started ? img : "fire";
     if (ico.getAttribute("data-k") === key) return;
     ico.setAttribute("data-k", key);
     ico.innerHTML = '<img src="assets/' + key + '.png" alt="">';

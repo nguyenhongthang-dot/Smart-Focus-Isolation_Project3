@@ -363,7 +363,7 @@
   padding: 0 calc(var(--s) * 0.06);
   border: none;
   border-radius: 6px;
-  background: rgba(0, 0, 0, 0.17);
+  background: rgba(0, 0, 0, 0.4);
   color: #fff;
   font-family: Inter, sans-serif;
   font-weight: 700;

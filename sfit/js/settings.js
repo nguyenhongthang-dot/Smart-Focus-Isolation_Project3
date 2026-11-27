@@ -110,6 +110,8 @@
           }),
         );
         S.applyTheme(state.theme); // áp theme ngay khi bấm Save
+        var ico = document.getElementById("ico-fire");
+        if (ico) ico.removeAttribute("data-k");
 
         // 2. Gửi Data Sources và Keywords xuống Backend để lưu vào config.json
         // Chú ý: Backend (analyzer.py) dùng key là 'keywords' thay vì 'kws'

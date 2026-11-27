@@ -16,6 +16,7 @@
   --page: #3a1c00;
   --tint: rgba(90, 40, 0, 0.22);
   --bg-img: url(../assets/bg.jpg);
+  --logo-img: url(../assets/logo.png);
   --modal: #000;
   --menu: #111;
   --field: #000;
@@ -27,7 +28,7 @@
 :root[data-theme="pond"] {
   --y: #91c3c0;
   --y-soft: #91c3c0;
-  --pill-val: #81cdcd;
+  --pill-val: #a9d0d0;
   --pill-label: #ffffff;
   --h3: #bdfaf6;
   --y-mid: #5899a0;
@@ -37,11 +38,12 @@
   --page: #112138;
   --tint: rgba(17, 33, 56, 0.15);
   --bg-img: url(../assets/Pond.png);
-  --modal: #112138;
-  --menu: #335d83;
-  --field: #335d83;
+  --logo-img: url(../assets/logo-pond.png);
+  --modal: #070f1e;
+  --menu: #070f1e;
+  --field: #070f1e;
   --field-line: #1e5475;
-  --field-focus: #547797;
+  --field-focus: #34404c;
 }
 * {
   box-sizing: border-box;
