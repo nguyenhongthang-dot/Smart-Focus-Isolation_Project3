@@ -45,6 +45,29 @@
   --field-line: #1e5475;
   --field-focus: #34404c;
 }
+
+/* ===== Theme Summit ===== */
+:root[data-theme="summit"] {
+  --y: #c96f71;
+  --y-soft: #e0a178;
+  --pill-val: #e8b48f;
+  --pill-label: #ffffff;
+  --h3: #c96f71;
+  --y-mid: #a75348;
+  --sw-on: #a75348;
+  --ur: #e0a178;
+  --panel: rgba(2, 1, 14, 0.3);
+  --page: #021524;
+  --tint: rgba(2, 21, 36, 0.15);
+  --bg-img: url(../assets/Summit.png);
+  --logo-img: url(../assets/logo-summit.png);
+  --modal: #021524;
+  --menu: #021524;
+  --field: #021524;
+  --field-line: #693533;
+  --field-focus: #383642;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;

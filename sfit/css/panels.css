@@ -245,10 +245,10 @@ h3 {
   transform: translateX(100%);
   background: #96c8c8;
 }
-/* SỬA: Nút thứ 3 (Ocean) được chọn → trượt 2 ô + màu xanh biển */
+/* SỬA: Nút thứ 3 (Summit) được chọn → trượt 2 ô + màu xanh biển */
 .theme:has(button:nth-child(3).on)::before {
   transform: translateX(200%);
-  background: #1c6e94;
+  background: #c96f71;
 }
 
 .theme button {
@@ -538,4 +538,8 @@ body:has(.tabh) .btn {
   transform: none !important;
   background: transparent !important;
   color: #fff !important;
+}
+
+.top > div:first-child {
+  margin-top: 7vh;
 }

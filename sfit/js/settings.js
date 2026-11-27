@@ -61,7 +61,7 @@
     var THEMES = [
       ["desert", "Desert"],
       ["pond", "Pond"],
-      ["ocean", "Ocean"],
+      ["summit", "Summit"],
     ];
     var themeBox = h("div", { class: "theme" });
     var themeBtns = THEMES.map(function (t) {
@@ -151,7 +151,6 @@
 
     var top = h("div", { class: "top" }, [
       h("div", null, [
-        h("h3", { text: "Data sources and AI configuration" }),
         h("b", {
           text: "App notification source",
           style: "font-size:18px",
@@ -243,7 +242,7 @@
       grid,
       h("div", { class: "divider" }),
       h("b", {
-        text: "AI Brain Configuration",
+        text: "AI brain configuration",
         style: "font-size:18px",
       }),
       h("p", { text: "Your emergency keyword:" }),
