@@ -27,13 +27,13 @@
 /* ===== Theme Pond ===== */
 :root[data-theme="pond"] {
   --y: #91c3c0;
-  --y-soft: #91c3c0;
+  --y-soft: #a7ebe6;
   --pill-val: #a9d0d0;
   --pill-label: #ffffff;
   --h3: #bdfaf6;
   --y-mid: #5899a0;
   --sw-on: #138d83;
-  --ur: #91c3c0;
+  --ur: #85f2ea;
   --panel: rgba(0, 0, 0, 0.29);
   --page: #112138;
   --tint: rgba(17, 33, 56, 0.15);
@@ -52,7 +52,7 @@
   --y-soft: #e0a178;
   --pill-val: #e8b48f;
   --pill-label: #ffffff;
-  --h3: #c96f71;
+  --h3: #f5b4b5;
   --y-mid: #a75348;
   --sw-on: #a75348;
   --ur: #e0a178;

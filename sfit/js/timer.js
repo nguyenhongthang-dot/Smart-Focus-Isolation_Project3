@@ -443,6 +443,7 @@
     var theme = document.documentElement.getAttribute("data-theme");
     var img = "fire2";
     if (theme == "pond") img = "fire3";
+    if (theme == "summit") img = "fire4";
     var key = T.started ? img : "fire";
     if (ico.getAttribute("data-k") === key) return;
     ico.setAttribute("data-k", key);

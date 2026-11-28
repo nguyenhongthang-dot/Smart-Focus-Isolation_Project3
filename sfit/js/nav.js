@@ -47,20 +47,6 @@
   }
 
   function go(tab) {
-    // Nếu có thay đổi chưa lưu
-    if (window.SFIT.hasUnsavedSettings) {
-      // 1. Tìm nút Save
-      var saveBtn = document.querySelector(".btn.unsaved");
-      if (saveBtn) {
-        // 2. Kích hoạt hiệu ứng rung lắc
-        saveBtn.classList.remove("shake");
-        void saveBtn.offsetWidth; // Mẹo trigger lại animation
-        saveBtn.classList.add("shake");
-      }
-      // 3. Chặn thoát (return luôn không chạy code đổi màn hình bên dưới)
-      return;
-    }
-
     state.tab = tab;
     paintNav();
     view.textContent = "";

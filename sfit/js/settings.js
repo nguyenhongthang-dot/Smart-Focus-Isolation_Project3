@@ -37,17 +37,19 @@
     var bVi = h("button", {
       text: "Tiếng Việt",
       onclick: function () {
-        if (state.lang !== "vi") markUnsaved();
+        if (state.lang === "vi") return;
         state.lang = "vi";
         paintLang();
+        autoSave();
       },
     });
     var bEn = h("button", {
       text: "English",
       onclick: function () {
-        if (state.lang !== "en") markUnsaved();
+        if (state.lang === "en") return;
         state.lang = "en";
         paintLang();
+        autoSave();
       },
     });
     function paintLang() {
@@ -68,9 +70,10 @@
       var b = h("button", {
         text: t[1],
         onclick: function () {
-          if (state.theme !== t[0]) markUnsaved();
+          if (state.theme === t[0]) return;
           state.theme = t[0];
           paintTheme();
+          autoSave();
         },
       });
       themeBox.appendChild(b);
@@ -82,24 +85,26 @@
       });
     }
     paintTheme();
-    /* save button */
-    var save = h("button", {
-      class: "btn",
-      text: "Save AI configuration",
-      disabled: true,
-    });
-    var saveTimer = null;
 
-    function markUnsaved() {
-      S.hasUnsavedSettings = true;
-      save.disabled = false;
-      save.classList.add("unsaved");
-      save.textContent = "Save AI configuration";
+    /* Trạng thái tự lưu (thay cho nút Save) */
+    var status = h("span", { class: "save-status", text: "" });
+    var statusTimer = null;
+    function showStatus(msg) {
+      status.textContent = msg;
+      clearTimeout(statusTimer);
+      statusTimer = setTimeout(function () {
+        status.textContent = "";
+      }, 1600);
     }
 
-    save.addEventListener("click", async function () {
+    /* Xếp hàng: lần lưu sau luôn chạy sau lần trước, không bị đảo thứ tự */
+    var queue = Promise.resolve();
+    function autoSave() {
+      queue = queue.then(doSave);
+    }
+
+    async function doSave() {
       try {
-        // 1. Lưu cấu hình giao diện (ngôn ngữ, chủ đề) vào localStorage cho Front-end xử lý
         localStorage.setItem(
           "sfit-settings",
           JSON.stringify({
@@ -109,45 +114,27 @@
             theme: state.theme,
           }),
         );
-        S.applyTheme(state.theme); // áp theme ngay khi bấm Save
+        S.applyTheme(state.theme);
         var ico = document.getElementById("ico-fire");
         if (ico) ico.removeAttribute("data-k");
 
-        // 2. Gửi Data Sources và Keywords xuống Backend để lưu vào config.json
-        // Chú ý: Backend (analyzer.py) dùng key là 'keywords' thay vì 'kws'
-        const payload = {
-          sources: state.sources,
-          keywords: state.kws,
-        };
-
         const response = await fetch("http://127.0.0.1:8010/api/config", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ sources: state.sources, keywords: state.kws }),
         });
 
         if (response.ok) {
-          save.textContent = "Saved";
-          S.hasUnsavedSettings = false;
-          save.disabled = true;
-          save.classList.remove("unsaved", "shake");
           S.updateConnected();
-          S.activeLang = state.lang; // THÊM
+          S.activeLang = state.lang;
           S.applyLang();
         } else {
-          save.textContent = "API Error";
+          console.error("API Error", response.status);
         }
       } catch (e) {
         console.error(e);
-        save.textContent = "Cannot save";
       }
-      clearTimeout(saveTimer);
-      saveTimer = setTimeout(function () {
-        save.textContent = "Save AI configuration";
-      }, 1600);
-    });
+    }
 
     var top = h("div", { class: "top" }, [
       h("div", null, [
@@ -160,7 +147,6 @@
       h("div", { class: "acts" }, [
         themeBox,
         h("div", { class: "lang" }, [bEn, bVi]),
-        save,
       ]),
     ]);
 
@@ -188,7 +174,7 @@
       }
       sw.addEventListener("click", function () {
         state.sources[k] = !state.sources[k];
-        markUnsaved();
+        autoSave();
         paint();
       });
       paint();
@@ -218,7 +204,7 @@
           state.kws = state.kws.filter(function (v) {
             return v !== k;
           });
-          markUnsaved();
+          autoSave();
           paintChips();
         });
         kw.insertBefore(h("span", { class: "chip" }, [k + " ", x]), input);
@@ -229,7 +215,7 @@
       if (e.key === "Enter" && v) {
         if (state.kws.indexOf(v) === -1) {
           state.kws.push(v);
-          markUnsaved();
+          autoSave();
         }
         input.value = "";
         paintChips();
